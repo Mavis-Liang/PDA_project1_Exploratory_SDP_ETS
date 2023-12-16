@@ -14,6 +14,8 @@ The overall conclusion is that, due to the poor quality of the data, we can't dr
 
 + `./pre-processing`: Some preprocessing with the raw data
 
++ `./Figures`: the folders that contains selected figures
+
 Note that due to data privacy, the repository would not contain either the original data or the cleaned data we used in this study.
 
 ## Report Overview
