@@ -33,7 +33,7 @@ The report within this repository is structured to guide the reader through the 
 
 ## Selected Figures
 
-![](./Figures/missing.png)
+![](./Figures/Missing.png)
 
 ![](./Figures/Lasagna.png)
 
