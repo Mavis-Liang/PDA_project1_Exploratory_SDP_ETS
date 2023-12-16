@@ -9,6 +9,7 @@ number-sections: true
 editor: visual
 author: 
   - Mavis Liang
+bibliography: cite.bib
 ---
 
 ```{r setup, include=FALSE, message=FALSE, error=FALSE}
@@ -33,26 +34,135 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE,
 
 # Introduction
 
-Maternal Smoking during Pregnancy (SDP) and environmental tobacco smoke (ETS) are two of the most ubiquitous and hazardous of children’s environmental exposures. Early smoke-exposure increases rates of externalizing behaviors in children.
+Maternal Smoking during Pregnancy (SDP) and environmental tobacco smoke (ETS) are two of the most ubiquitous and hazardous of children's environmental exposures. Early smoke-exposure increases rates of externalizing behaviors in children.The changes in the brain are associated with adverse neurodevelopmental outcomes. Epidemiologic studies suggest maternal active smoking (i.e. direct intake of tobacco through cigarettes) during pregnancy is associated with child behavior problems, such as attention deficit and hyperactivity disorder (ADHD) as well as adult criminal behavior [@article1].
 
-A subset of 100 mothers from a previous study on smoke avoidance intervention to reduce low-income women’s (N=738) smoking and ETS exposure during pregnancy and children’s exposure to ETS in the immediate postpartum period are randomly selected for this study.
+A subset of 100 mothers from a previous study on smoke avoidance intervention to reduce low-income women's (N=738) smoking and ETS exposure during pregnancy and children's exposure to ETS in the immediate postpartum period are randomly selected for this study. This dataset is provided by Lauren Micalizzi, Ph.D. from Brown university, and this project is within the large NIH project of Prenatal Tobacco Exposure: Sel-regulatory Pathways to Externalizing Behaviours.
 
 With this dataset, we aim at examining the effects of SDP/ETS on adolescent self-regulation, substance use, and externalizing.
 
-The code for this analysis can be found in Github: [https://github.com/Mavis-Liang/pda_project1](https://github.com/Mavis-Liang/pda_project1).
+The code for this analysis can be found in Github: <https://github.com/Mavis-Liang/pda_project1>.
 
-# Data overview
+# Data
 
 ```{r}
 df <- read.csv("../project1.csv")
 ```
 
-The data contain 49 individuals of 78 variables. Within each individual data, we have the demographic data for the child and mom, and we also have the smoking behaviors of moms, the social-economic data of moms, and the mental behaviors of both mom and child. 
+The dataset comprises data from 49 individuals, including demographic information, maternal smoking behavior, socio-economic status, and mental health indicators for both mother and child. Notably, all participants had records in ADHD-related variables (swan_hyperactive and swan_inattentive), although a significant portion of the data contained missing values in other variables.
 
-We notice that while a large proportion of patients have missing values in some of the variables, all of them have a record in ADHA related variables (`swan_hyperactive` and `swan_innerattentive`). Selected variables are summarized in Table 1 to Table 5.
+The variables in the dataset can be summarized into three categories, according to the study aim:
+
+-   **Outcome**:
+    -   Self-regulation (which can also be a mediator) - `erq_cog`, `erq_exp`
+    -   Substance use (SU) - cig/e_cig/mj/alc ever/num
+    -   Externalizing (EXT) - `bpm_ext_p`, `bpm_ext`, ADHD(`swan_hyperactive` and `swan_inattentive`)
+-   **Predictors**:
+    -   Smoking during pregnancy (SDP) - `mom_smoke_16`, `mom_smoke_22`, `mom_smoke_32wk`, `cotimean_34week`
+    -   Environmental tobacco exposure (ETS) - `mom_smoke_pp1`, `mom_smoke_pp2`, `mom_smoke_pp12wk`, `mom_smoke_pp6mo`, `smoke_exposure_6mo`, `cotimean_pp6mo`, `cotimean_pp6mo_baby`
+-   **Confounders**:
+    -   age, race, language, ect.
+
+
+# Methods
+
+## Data Preprocessing
+
+The preprocessing code provided by Dr. Alice Paul performs several steps to clean, transform, and prepare both child and parent data for analysis. Here's a summary of what each section of the code accomplishes:
+
+**Child Data Processing**
+
+Initial Data Loading and Selection: Child data (child_df) is loaded from a CSV file and filtered for specific records (child_baseline_arm_1). Only a subset of columns is retained.
+
+Demographic Variable Selection: Removes various demographic variables and renames some race-related variables for clarity.
+
+Dropping Brief YSR Variables: Excludes a range of variables related to the Brief Youth Self-Report due to scoring difficulties.
+
+Substance Use Variables Summarization: Creates new variables summarizing cigarette, e-cigarette, marijuana, and alcohol usage (cig_ever, num_cigs_30, etc.) and drops related detailed variables.
+
+Dropping Other Drugs and Norms Variables: Omits variables related to other drugs and perceived norms.
+
+Brief Problem Monitor Scoring: Calculates scores for attention, externalizing, and internalizing problems based on the Brief Problem Monitor (BPM) questionnaire.
+
+Emotional Regulation: Computes cognitive and expressive emotional regulation scores and drops related detailed variables.
+
+Dropping Physical and Life Stress Variables: Excludes variables related to physical development and life stress.
+
+Parental Monitoring Scoring: Computes scores for parental knowledge, child disclosure, parental solicitation, and parental control based on the Parental Monitoring questionnaire.
+
+Dropping Dysregulation and Early Adolescent Temperament Variables: Removes variables related to dysregulation inventory and early adolescent temperament.
+
+Alcohol and Substance Abuse: Excludes alcohol and substance abuse-related variables due to few observations.
+
+Diet Questions Removal: Drops remaining diet-related questions.
+
+**Parent Data Processing**
+
+Loading and Filtering Parent Data: Loads parent data from the same CSV file and filters it for a specific record (parent_baseline_arm_2). Selects a subset of columns.
+
+Demographics Processing: Similar to child data, processes demographic variables for parents.
+
+Dropping Brief Parent Variables: Removes variables related to the Brief Parent questionnaire.
+
+SWAN Processing: Calculates scores for inattentive and hyperactive symptoms based on the SWAN questionnaire.
+
+Dropping Connors Variables: Excludes Connors questionnaire variables.
+
+Parental Brief Problem Monitor: Calculates scores for parental BPM related to the child.
+
+Alcohol and Drug Use: Processes variables related to alcohol and drug use, especially focusing on smoke exposure at different child ages.
+
+Dropping Additional Variables: Removes variables related to other assessments like CHAOS, adult BPM, adult emotional regulation, adult temperament, and ETQ.
+
+Combining Data: Joins the processed child and parent datasets on parent_id.
+
+Final Data Export: The cleaned and combined dataset is exported as a CSV file for further analysis.
+
+Overall, the preprocessing focuses on refining the dataset to include only relevant variables for the study, summarizing complex questionnaire data into actionable metrics, and aligning child and parent data for comprehensive analysis.
+
+For our analysis we began with meticulous data preprocessing. Key steps included:
+
+**Assignment of Zero Values**: For variables related to substance use (SU) such as num_cigs_30, num_e_cigs_30, num_mj_30, and num_alc_30, we assigned a value of zero where corresponding 'ever used' variables (e.g., cig_ever, e_cig_ever, mj_ever, alc_ever) indicated no usage. This approach clarified the dataset by aligning numerical usage data with categorical usage indicators.
+
+**Missing Data Visualization**: We visualized the missing data pattern using a heatmap. Each row represented an individual participant, and each column corresponded to a variable. Blocks in the heatmap were color-coded—black for missing values and green for non-missing values. This visualization provided a clear overview of the missing data patterns and their associations across different variables.
+
+## Summary Statistics
+
+**Substance Use (SU)**: Focused on variables like num_cigs_30, num_e_cigs_30, num_mj_30, and num_alc_30.
+
+**Self-regulation**: Analyzed variables such as erq_cog and erq_exp.
+
+**Externalizing Behaviors**: Included variables like bpm_ext, bpm_ext_p, swan_hyperactive, and swan_inattentive.
+
+**Maternal Smoking During Pregnancy (SDP)**: Examined variables indicating maternal smoking at different pregnancy stages and postpartum periods.
+
+**Environmental Tobacco Smoke (ETS)**: Focused on variables representing environmental smoke exposure.
+
+## Analyzing Outcomes in Relation to SDP and ETS
+Each outcome was assessed for the effects of SDP or ETS, both separately and in combination.
+
+Self-regulation
+We stratified summary tables of self-regulation variables by missingness to explore the impact of SDP/ETS on missing data patterns, given the substantial proportion of missing values in these outcomes. Additionally, we utilized Lasagna plots, boxplots, and scatterplots to delve deeper into these relationships.
+
+Substance Use (SU)
+Given the limited number of records available for SU outcomes, we conducted a detailed analysis of the few individuals with relevant data.
+
+Externalizing Behaviors
+For Externalizing outcomes, we produced correlation plots to examine the relationships between different variables, including parent and child-reported externalizing behaviors and ADHD-related scores.
+
+## Visualizations and Statistical Analysis
+
+Our analysis employed a range of visualizations:
+
+**Lasagna Plots**: These plots provided a temporal view of maternal smoking behavior during and after pregnancy.
+
+**Boxplots and Scatterplots**: Used to explore associations between SDP/ETS and various outcomes like self-regulation and externalizing behaviors.
+
+**Correlation Plots (ggpairs)**: Employed to visualize pairwise relationships among variables related to externalizing behaviors.
+
+# Results
 
 ## Overall missing pattern
-    
+
 ```{r, data_cleaning}
 df$num_cigs_30[df$cig_ever==0]=0
 df$num_e_cigs_30[df$e_cig_ever==0]=0
@@ -61,11 +171,12 @@ df$num_alc_30[df$alc_ever==0]=0
 
 df_filled <- 
 df %>% 
-  mutate_all(~ifelse(.=="", NA, .)) 
+  mutate_all(~ifelse(.=="", NA, .)) %>% 
+  mutate(bpm_ext = as.numeric(bpm_ext),
+         bpm_ext_p = as.numeric(bpm_ext_p))
 ## put numeric variables into numeric
 ```
-    
-    
+
 ```{r, missing_heatmap, fig.cap="Missingness in each variable for each individual"}
 df_missing <- 
   apply(df_filled, 2, function(x) ifelse(is.na(x), "Yes", "No")) %>%
@@ -86,33 +197,19 @@ df_missing %>%
   labs(fill = "Is missing?")
 ```
 
-**Figure 1** shows the missing values for each individuals. Those with missing values usually have missing values in multiple variables. The missingness my not random.
+**Figure 1** shows the missing values for each individuals. Those with missing values usually have missing values in multiple variables. 
+Looking at individual data, those who have missingness in many variables (eg. `parent_id` = 54702) have a relatively larger value in `cotimean_pp6mo` and `cotimean_6mo`, but this pattern is not substantial. Also, these individuals usually have values of 0 in `swan_hyperactive` and `swan_inattentive`; These two variables measure the externalizing behaviors of the child.
 
-Looking at individual data, those have missingness in many variables (eg. `parent_id` = 54702) have a relatively larger value in `cotimean_pp6mo` and `cotimean_6mo`, but this pattern is not substantial. Also, these individuals usually have values of 0 in `swan_hyperactive` and `swan_inattentive`; These two variables measure the externalizing behaviors of the child.
+## Summary for Variables of Interest
 
+Summary statistics of the 5 groups of variables belongs to outcome and predictors are made into Table 1 to Table 5 below. 
 
-## Variables of Interest
-
-The variables in the dataset can be summarized into three categories, according to the study aim:
-
--   Outcome variables:
-    -   Self-regulation (which can also be a mediator) - `erq_cog`, `erq_exp`
-    -   Substance use (SU) - cig/e_cig/mj/alc ever/num
-    -   Externalizing (EXT) - `bpm_ext_p`, `bpm_ext`, ADHD(`swan_hyperactive` and `swan_inattentive`)
--   Predictive variables:
-    -   Smoking during pregnancy (SDP) - `mom_smoke_16`, `mom_smoke_22`, `mom_smoke_32wk`, `cotimean_34week`
-    -   Environmental tobacco exposure (ETS) - `mom_smoke_pp1`, `mom_smoke_pp2`, `mom_smoke_pp12wk`, `mom_smoke_pp6mo`, `smoke_exposure_6mo`, `cotimean_pp6mo`, `cotimean_pp6mo_baby`
--   Confounding variables:
-    -   age, race, language, ...
-    
-Summary statistics of the 5 groups of variables belongs to outcome and predictors are made into Table 1 to Table 5 below. Note that variables in SU like `cig_ever` and `num_cig` are collapsed. 0 in `num_cig` indicates a "No" in `cig_ever`.
-    
 ```{r, tb_outcome, results='asis'}
-## Table showing partial variables (those with we are interested in)
+## Table showing partial variables (those we are interested in)
 ## Outcome 
 ## Sel-reg
-df_filled %>%
-  select(erq_cog, erq_exp) %>%
+df_test <- df_filled %>%
+  select(erq_cog, erq_exp) %>% 
   tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})"),
                   missing_text = "missing") %>% 
   modify_header(label = "**Self-regulation**") %>%
@@ -139,7 +236,8 @@ df_filled %>%
 tb_ext <- 
 df_filled %>%
   select(bpm_ext, bpm_ext_p, swan_hyperactive, swan_inattentive) %>%
-  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})"),
+  tbl_summary(type = list(bpm_ext ~ "continuous", bpm_ext_p ~ "continuous"),
+              statistic = list(all_continuous() ~ "{mean} ({sd})"),
               missing_text = "missing") %>% 
   modify_header(label = "**Externalizing**") %>%
   as_kable_extra(booktabs = TRUE,
@@ -161,7 +259,6 @@ cat(c("\\begin{table}[!htb]
 \\end{table}"
 ))  
 ```
-
 
 ```{r, tb_sdp_ets, results='asis'}
 ## SDP/ETS
@@ -205,7 +302,6 @@ cat(c("\\begin{table}[H]
 ))  
 ```
 
-# Method and Results
 
 ## The effect of SDP/ETS on the outcome of Self-regulation
 
@@ -235,7 +331,6 @@ df_sr %>%
               caption="SDP/ETS grouped by missing in self-regulation") %>%
   kable_styling(font_size = 7, latex_options = "hold_position")
 ```
-
 
 ```{r, base_erq}
 # association between erq_cog and erq_exp
@@ -292,7 +387,6 @@ df_sr %>%
         axis.text.y = element_blank())
 ```
 
-
 ```{r, fig.cap="Relationships within SDP/ETS variables and within self-regulation variables. A1 and A2 are the Lasagna plots for SDP and for ETS related to mom smoking over time. A1 shows if the moms have been smoking during pregnancy in the three time points; and A2 shows the results during postpartum. C shows the relationship between the Urine cotinine (nicotine metabolite) at 6 months postpartum from baby (Y-axis) and from mom (X-axis). D shows the relationship between the two variables representing self-regulation behavious in children, in which Expressive Suppression on Y axis and Cognitive Reappraisal on X-axis.", out.height="70%"}
 coti_momVSbaby <- 
 df_sr %>% 
@@ -318,19 +412,7 @@ plot_grid(p_lasagna, p_base,
                     rel_widths = c(2.5, 1))
 ```
 
-In **Figure 2**, we observed that,
-
-+ (**Figure 2 A1 and A2**)The missingness increased over time in the visits during pregnancy. There is a substantial missingness in `mom_smoke_pp1`.  Missing in smoking values during pregnant usually results in missing in postpartum.
-
-+ (**Figure 2 A1 and A2**)The smoking behaviors within individuals tend to persist, both during pregnancy and postpartum.
-
-+ (**Figure 2 A1 and A2**)If an individual has smoking behaviors during pregnancy, she will persist the same behavior. 
-
-+ (**Figure 2 B**)The correlation between the Urine cotinine detected in mom and in baby is not obvious. We believe that there is other sources of tabbaco exposure for the babies. 
-
-+ (**Figure 2 C**)The relationship between exp and cog is not obvious.
-
-In latter analysis, we will not use the variable of `mom_exposure_pp` and  `cotimean_pp6mo` but use `cotimean_pp6mo_baby` only, which indicate the ETS of a baby more directly.
+In **Figure 2**, we observed that, (1) (**Figure 2 A1 and A2**)The missingness increased over time in the visits during pregnancy. There is a substantial missingness in `mom_smoke_pp1`. Missing in smoking values during pregnant usually results in missing in postpartum. (2)  (**Figure 2 A1 and A2**)The smoking behaviors within individuals tend to persist, both during pregnancy and postpartum. (3) (**Figure 2 A1 and A2**)If an individual has smoking behaviors during pregnancy, she will persist the same behavior. (4) (**Figure 2 B**)The correlation between the Urine cotinine detected in mom and in baby is not obvious. We believe that there is other sources of tabbaco exposure for the babies. (5) (**Figure 2 C**)The relationship between exp and cog is not obvious.
 
 ```{r, erq_sdp, fig.cap="Association between self-regulation and SDP. `cotimean_34wk` > 20 is not shown in plot B for better display."}
 # slf-regulation vs SDP
@@ -425,17 +507,7 @@ plot_grid(box_slf_ext, slf_coti_pp, ncol = 2,
           rel_widths = c(2, 1))
 ```
 
-**Figure 3** shows the association between self-regulation and SDP and **Figure 4** shows the association between self-regulation and ETS. We observed that:
-
-+ The box plots shows that not smoking during pregnancy and postpartum results in a lower score in child's self-regulation issues, compring the mean values in the blue boxes and the red boxes. 
-
-+ On the other hand, the dots on the boxes indicate that the data is evenly distributed within groups of smoking or not smoking or those have missing values. However, outliers exist in all three groups.
-
-+ The scattter plots shows that the association between cog/exp and  urine cotinine is weak, which indicates that the self-regulation is not related to SDP or ETS.
-
-
-
-
+**Figure 3** shows the association between self-regulation and SDP and **Figure 4** shows the association between self-regulation and ETS. We observed that: (1) The box plots shows that not smoking during pregnancy and postpartum results in a lower score in child's self-regulation issues, compring the mean values in the blue boxes and the red boxes. (2) On the other hand, the dots on the boxes indicate that the data is evenly distributed within groups of smoking or not smoking or those have missing values. However, outliers exist in all three groups. (3) The scattter plots shows that the association between cog/exp and urine cotinine is weak, which indicates that the self-regulation is not related to SDP or ETS.
 
 ## The effect of SDP/ETS on substance use (SU)
 
@@ -473,14 +545,11 @@ df_su[,c(1, 12:16)] %>%
 
 ```
 
-
 ## The effect of SDP/ETS on Externalizing
-
 
 Exploring variables of externalizing behaviors, we notice that the ADHD variable range from 1 to 20. We observed some missing values in the `bpm_ext_p` and `bpm_ext`, which are the answers of externalizing behaviors of the child from mom and from the child themselves. Those have missing values in `bpm_ext_p` tend to also have missing values in `bpm_ext`.
 
 missing in exp answered by mom also missing in child
-
 
 ```{r, fig.cap="Pairwise relationships within Externalizing variables. Sub-plots at the lower triangle shows the scatterplot of the pairwise variables. Numbers in the upper triangle are the correlations of corresponding variables in pairs. Density curve in the diagnol is the density distribution of the variables in the top facet label. Note that both bpm_ext_p and bpm_ext are scores describing externalizing problems in child. bpm_ext_p are answered by parents, and bpm_ext are answered by children themselves."}
 df_ext <- 
@@ -497,18 +566,10 @@ df_ext %>%
   theme(text = element_text(size = 7))
 ```
 
-In **Figure 5**, what we observed is that:
-
-+ In the sub-figure at the 4th row and the 3rd column, although both `bpm_ext_p` and `bpm_ext` are scores describing externalizing problems in child, parents tend to underestimate the externalizing problems in child. 
-
-We believe that the answers from the children themselves are more reliable. Thus in the following analysis, we only show the effect of SDP/ETS on `bpm_ext`.
-
-+ In the first plot of the first column, we see that higher inattentive means higher hyperactive,  they have a corr of more than 0.8.
-
+In **Figure 5**, what we observed is that: (1) In the sub-figure at the 4th row and the 3rd column, although both `bpm_ext_p` and `bpm_ext` are scores describing externalizing problems in child, parents tend to underestimate the externalizing problems in child. We believe that the answers from the children themselves are more reliable. Thus in the following analysis, we only show the effect of SDP/ETS on `bpm_ext`. (2) In the first plot of the first column, we see that higher inattentive means higher hyperactive, they have a corr of more than 0.8.
 
 ```{r, deprecated_pairwise_plot, eval=FALSE, echo=FALSE}
 ```
-
 
 ```{r, deprecated_pairwise_plot, eval=FALSE, echo=FALSE}
 p_adhd <- 
@@ -530,7 +591,6 @@ plot_grid(p_adhd, p_ext_momVSbaby,
           labels= c("A", "B"),
           label_size = 8)
 ```
-
 
 ```{r, fig.cap="Association between externalizing and SDP"}
 # Externalizing vs SDP
@@ -620,8 +680,7 @@ plot_grid(box_ext_sdp, ext_coti, ncol = 2,
           rel_widths = c(2, 1))
 ```
 
-+ Similar to the result for self-regulation, the association between externalizing and SDP/ETS is not strong.
-
+-   Similar to the result for self-regulation, the association between externalizing and SDP/ETS is not strong.
 
 # Limitations
 
@@ -629,6 +688,12 @@ The data has a small size, and within the data, many individuals have missing va
 
 On the other hand, there are many confoundings we can adjust. For example, the ADHD or other mental/behavial history can be genetically passed to the child. Also, the social-economic status can cause the difference of a child's development of behavior issues. However, due to the limitation of the quality of the data, we are not able to control all these confoundings when we explore the relationships between SDP/ETS and behavior problems.
 
+\newpage
+
+# Reference
+
+::: {#refs}
+:::
 
 \newpage
 
